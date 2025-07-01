@@ -1,6 +1,3 @@
-// Copyright (C) 2025 Intel Corporation
-// SPDX-License-Identifier: Apache-2.0
-
 export enum PipelineEvents {
   UPLOAD_TO_DATASTORE = 'pipeline.upload',
   UPLOAD_TO_DATASTORE_COMPLETE = 'pipeline.upload.complete',
@@ -18,6 +15,7 @@ export enum PipelineEvents {
 
   CHUNK_RECEIVED = 'pipeline.chunk.received',
   CHUNK_CAPTION_COMPLETE = 'pipeline.chunk.caption',
+  CHUNK_SEARCH_EMBEDDINGS = 'pipeline.chunk.search.embeddings',
 
   FRAME_CAPTION_PROCESSING = 'pipeline.chunk.frame.captionProgress',
   FRAME_CAPTION_COMPLETE = 'pipeline.chunk.frame.caption',
@@ -41,8 +39,6 @@ export interface PipelineDTOBase {
 export interface PipelineUploadToDS extends PipelineDTOBase {
   fileInfo: Express.Multer.File;
 }
-
-export interface PipelineChunkReceived extends PipelineDTOBase {}
 
 export interface FrameCaptionEventDTO extends PipelineDTOBase {
   frameIds: string[];

@@ -1,6 +1,3 @@
-// Copyright (C) 2025 Intel Corporation
-// SPDX-License-Identifier: Apache-2.0
-
 import {
   BadRequestException,
   Body,
@@ -40,34 +37,21 @@ export class SearchController {
 
   @Post('')
   async addQuery(@Body() reqBody: SearchQueryDTO) {
-    let query = await this.$search.newQuery(reqBody.query);
-
-    Logger.log('Query created', query);
-
     try {
-      const queryShim: SearchShimQuery = {
-        query: query.query,
-        query_id: query.queryId,
-      };
-      const results = await lastValueFrom(this.$searchShim.search([queryShim]));
-
-      if (results.data && results.data.results.length > 0) {
-        const resultRelevant = results.data.results.find(
-          (el) => el.query_id === query.queryId,
-        );
-
-        const updatedQuery = await this.$search.updateResults(
-          query.queryId,
-          resultRelevant || { query_id: query.queryId, results: [] },
-        );
-
-        if (updatedQuery) query = updatedQuery;
-      }
+      const query = await this.$search.addQuery(
+        reqBody.query,
+        reqBody.tags ?? [],
+      );
+      return query;
     } catch (error) {
-      Logger.error('Error in search shim', error);
+      Logger.error('Error adding query', error);
     }
+  }
 
-    return query;
+  @Post(':queryId/refetch')
+  async refetchQuery(@Param() params: { queryId: string }) {
+    const res = await this.$search.reRunQuery(params.queryId);
+    return res;
   }
 
   @Post('query')
@@ -85,7 +69,7 @@ export class SearchController {
     @Param() params: { queryId: string },
     @Body() body: { watch: boolean },
   ) {
-    if (!body.hasOwnProperty('watch')) {
+    if (!Object.prototype.hasOwnProperty.call(body, 'watch')) {
       throw new BadRequestException('Watch property is required');
     }
 
