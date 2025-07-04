@@ -92,6 +92,7 @@ export VLM_MODEL_NAME=${VLM_MODEL_NAME}
 export VLM_COMPRESSION_WEIGHT_FORMAT=int8
 export VLM_DEVICE=CPU
 export VLM_SEED=42
+export WORKERS=6
 export VLM_HOST=vlm-openvino-serving
 export VLM_ENDPOINT=http://${VLM_HOST}:8000/v1
 export USER_ID=$(id -u)
@@ -203,7 +204,7 @@ echo -e "${GREEN}Output directory for object detection model: ${YELLOW}$OD_MODEL
 
 
 # Verify if required environment variables are set in current shell, only when container down is not requested.
-if [ "$1" != "--down" ]; then
+if [ "$1" != "--down" ] && [ "$2" != "config" ]; then
     if [ -z "$MINIO_ROOT_USER" ]; then
         echo -e "${RED}ERROR: MINIO_ROOT_USER is not set in your shell environment.${NC}"
         return
@@ -484,6 +485,7 @@ if [ "$1" = "--summary" ] || [ "$1" = "--all" ]; then
             export PM_LLM_CONCURRENT=1
             export VLM_COMPRESSION_WEIGHT_FORMAT=int4
             export PM_MULTI_FRAME_COUNT=6
+            export WORKERS=1
             echo -e  "Using VLM for summarization on GPU"
         else
             export VLM_DEVICE=CPU

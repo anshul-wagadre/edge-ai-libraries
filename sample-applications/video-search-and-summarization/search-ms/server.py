@@ -66,8 +66,8 @@ async def query_endpoint(request: list[QueryRequest]):
     try:
 
         async def process_query(query_request):
-            docs_with_score = get_vectordb().similarity_search_with_score(
-                query_request.query, k=20, normalize_distance=True
+            docs_with_score = get_vectordb().similarity_search_with_relevance_scores(
+                query_request.query, k=20
             )
             query_results = []
             for res, score in docs_with_score:
@@ -103,6 +103,12 @@ async def watcher_last_updated():
     except Exception as e:
         logger.error(f"Error in watcher_last_updated: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/health")
+async def health_check():
+    """Simple health check endpoint to verify the service is running."""
+    return {"status": "ok", "timestamp": datetime.now().isoformat()}
 
 
 @app.get("/initial-upload-status")
