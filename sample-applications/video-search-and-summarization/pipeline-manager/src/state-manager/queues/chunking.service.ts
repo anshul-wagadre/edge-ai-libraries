@@ -352,11 +352,12 @@ export class ChunkingService {
           );
           this.$state.searchEmbeddingsCreated(stateId, frameIds.join('#'));
         },
-        error: () => {
+        error: (error: any) => {
           Logger.error(
             'Error creating search embeddings for chunk',
             stateId,
             frameIds,
+            error,
           );
         },
       });

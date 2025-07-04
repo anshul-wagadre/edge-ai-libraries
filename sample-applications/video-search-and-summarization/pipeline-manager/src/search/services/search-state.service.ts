@@ -119,7 +119,7 @@ export class SearchStateService {
     const queries = await this.$searchDB.readAll();
 
     const queriesOnWatch: SearchQuery[] = queries.filter(
-      (query) => query.watch,
+      (query) => !query.watch,
     );
 
     if (queriesOnWatch.length > 0) {
