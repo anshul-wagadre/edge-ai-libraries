@@ -9,7 +9,7 @@ import {
   SelectItem,
   TextInput,
 } from '@carbon/react';
-import axios, { AxiosProgressEvent, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosProgressEvent, AxiosResponse } from 'axios';
 import { FC, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -122,7 +122,7 @@ export const VideoUpload: FC<VideoUploadProps> = ({ closeDrawer, isOpen }) => {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [summaryName, setSummaryName] = useState<string | null>('');
-  const [videoTags] = useState<string | null>('');
+  const [videoTags, SetVideoTags] = useState<string | null>('');
   const [chunkDuration, setChunkDuration] = useState<number>(() => defaultChunkDuration);
   const [sampleFrame, setSampleFrame] = useState<number>(() => defaultSampleFrames);
 
@@ -259,7 +259,7 @@ export const VideoUpload: FC<VideoUploadProps> = ({ closeDrawer, isOpen }) => {
   const getSummaryPipelineDTO = (videoId: string): SummaryPipelineDTO => {
     const title = summaryName ?? '';
 
-    let res: SummaryPipelineDTO = {
+    const res: SummaryPipelineDTO = {
       evam: { evamPipeline: (selectorRef?.current?.value as EVAMPipelines) ?? EVAMPipelines.OBJECT_DETECTION },
       sampling: {
         chunkDuration: chunkDuration,
@@ -334,8 +334,15 @@ export const VideoUpload: FC<VideoUploadProps> = ({ closeDrawer, isOpen }) => {
     } catch (error: any) {
       console.log('ERROR', error);
       if (error.reponse && error.response.data) {
-        notify(error.response.data.message, NotificationSeverity.ERROR);
+        notify(error.response.data, NotificationSeverity.ERROR);
+      } else if (error.request) {
+        notify(error.request, NotificationSeverity.ERROR);
+      } else if (error instanceof AxiosError && error.message) {
+        notify(error.message, NotificationSeverity.ERROR);
+      } else {
+        notify(t('error'), NotificationSeverity.ERROR);
       }
+
       setUploading(false);
       setProgressText(t('error'));
       setProcessing(false);
@@ -360,6 +367,13 @@ export const VideoUpload: FC<VideoUploadProps> = ({ closeDrawer, isOpen }) => {
             <FullWidthButton onClick={videoFileInputClick} kind='danger--tertiary'>
               {t('changeVideo')}
             </FullWidthButton>
+            <TextInputStyled
+              labelText={t('videoTags')}
+              onChange={(ev) => {
+                SetVideoTags(ev.currentTarget.value);
+              }}
+              id='videoTags'
+            />
             <TextInputStyled
               ref={videoLabelRef}
               onChange={(ev) => {

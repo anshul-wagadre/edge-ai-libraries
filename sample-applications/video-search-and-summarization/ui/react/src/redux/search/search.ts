@@ -1,6 +1,3 @@
-// Copyright (C) 2025 Intel Corporation
-// SPDX-License-Identifier: Apache-2.0
-
 export interface SearchQueryDTO {
   query: string;
   tags?: string[];
@@ -62,8 +59,12 @@ export interface SearchQuery {
   updatedAt: string;
 }
 
+export interface SearchQueryUI extends SearchQuery {
+  topK: number;
+}
+
 export interface SearchState {
-  searchQueries: SearchQuery[];
+  searchQueries: SearchQueryUI[];
   unreads: string[];
   selectedQuery: string | null;
   triggerLoad: boolean;

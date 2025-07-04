@@ -27,7 +27,7 @@ const App: FC = () => {
   const connectedSockets: Set<string> = new Set<string>();
 
   useEffect(() => {
-    if (!FeatureMux.hasOwnProperty(FEATURE_MUX)) {
+    if (!Object.keys(FeatureMux).includes(FEATURE_MUX)) {
       throw new Error(`Feature Mux ${FEATURE_MUX} is not supported`);
     }
   });
@@ -102,7 +102,7 @@ const App: FC = () => {
         }
       }
     }
-  }, [summaryIds]);
+  }, [connectedSockets, dispatch, summaryIds]);
 
   return (
     <>

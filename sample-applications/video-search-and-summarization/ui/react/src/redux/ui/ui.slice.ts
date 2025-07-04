@@ -1,6 +1,3 @@
-// Copyright (C) 2025 Intel Corporation
-// SPDX-License-Identifier: Apache-2.0
-
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { OpenPromptModal, UISliceState } from './ui.model';
 import { RootState } from '../store';

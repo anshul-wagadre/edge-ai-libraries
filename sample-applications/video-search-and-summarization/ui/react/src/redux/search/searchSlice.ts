@@ -1,8 +1,5 @@
-// Copyright (C) 2025 Intel Corporation
-// SPDX-License-Identifier: Apache-2.0
-
 import { createAsyncThunk, createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SearchQuery, SearchState } from './search';
+import { SearchQuery, SearchQueryUI, SearchResult, SearchState } from './search';
 import { RootState } from '../store';
 import axios from 'axios';
 import { APP_URL } from '../../config';
@@ -30,6 +27,10 @@ export const SearchSlice = createSlice({
         state.searchQueries[index] = { ...state.searchQueries[index], ...action.payload };
       }
     },
+    updateTopK: (state: SearchState, action: PayloadAction<{ queryId: string; topK: number }>) => {
+      state.searchQueries[state.searchQueries.findIndex((query) => query.queryId === action.payload.queryId)].topK =
+        action.payload.topK;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -38,14 +39,26 @@ export const SearchSlice = createSlice({
       })
       .addCase(SearchLoad.fulfilled, (state, action) => {
         state.triggerLoad = false;
-        state.searchQueries = action.payload;
+        if (action.payload.length === 0) {
+          state.searchQueries = [];
+        } else {
+          state.searchQueries = action.payload.map((query) => ({ ...query, topK: 10 }));
+        }
+      })
+      .addCase(SearchSync.fulfilled, (state, action) => {
+        if (action.payload && action.payload.queryId) {
+          const index = state.searchQueries.findIndex((query) => query.queryId === action.payload!.queryId);
+          if (index !== -1) {
+            state.searchQueries[index] = { ...state.searchQueries[index], ...action.payload };
+          }
+        }
       })
       .addCase(SearchLoad.rejected, (state) => {
         state.triggerLoad = false;
         state.searchQueries = [];
       })
       .addCase(SearchAdd.fulfilled, (state, action) => {
-        state.searchQueries.push(action.payload);
+        state.searchQueries.push({ ...action.payload, topK: 10 });
         state.selectedQuery = action.payload.queryId;
       })
       .addCase(SearchWatch.fulfilled, (state) => {
@@ -60,6 +73,11 @@ export const SearchSlice = createSlice({
 export const SearchRemove = createAsyncThunk('search/remove', async (queryId: string) => {
   const queryRes = await axios.delete<SearchQuery>(`${APP_URL}/search/${queryId}`);
   return queryRes.data;
+});
+
+export const SearchSync = createAsyncThunk('search/sync', async (queryId: string) => {
+  const res = await axios.post<SearchQuery | null>(`${APP_URL}/search/${queryId}/refetch`);
+  return res.data;
 });
 
 export const SearchWatch = createAsyncThunk(
@@ -92,7 +110,15 @@ export const SearchSelector = createSelector([selectSearchState], (state) => ({
   unreads: state.unreads,
   triggerLoad: state.triggerLoad,
   selectedQuery: state.searchQueries.find((el) => el.queryId == state.selectedQuery),
-  selectedResults: state.searchQueries.find((el) => el.queryId == state.selectedQuery)?.results || [],
+  selectedResults: state.searchQueries.reduce((_: SearchResult[], curr: SearchQueryUI) => {
+    if (curr.queryId === state.selectedQuery) {
+      if (!curr || !curr.results || (curr.results && curr.results.length <= 0)) {
+        return [];
+      }
+      return curr.results.slice(0, curr.topK);
+    }
+    return [];
+  }, [] as SearchResult[]),
 }));
 
 export const SearchActions = SearchSlice.actions;

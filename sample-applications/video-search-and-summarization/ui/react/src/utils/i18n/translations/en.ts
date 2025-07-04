@@ -1,11 +1,9 @@
-// Copyright (C) 2025 Intel Corporation
-// SPDX-License-Identifier: Apache-2.0
-
 export const enTranslations = {
   VideoSummary: 'Video Summary',
-  VSSBrand: 'Video Search & Sumary',
+  VSSBrand: 'Video Summary & Search',
   VSearchBrand: 'Video Search',
   VSummBrand: 'Video Summary',
+  videoTags: 'Video tags (separated by commas)',
 
   SearchVideo: 'Search Videos',
   videoSearchStart: 'Video Search Query',
@@ -13,8 +11,12 @@ export const enTranslations = {
   search: 'Search',
   Queries: 'Search Queries',
   queryDeleteLabel: 'Delete Query',
+  queryDeleteSuccess: 'Query successfully deleted',
   searchNothingSelected: 'Create a search query',
   CreatingEmbeddings: 'Creating Embeddings',
+  EmbeddingsCreated: 'Embeddings Created',
+  selectASummaryFromSidebar: 'Select a Summary from the sidebar',
+  noSummariesAvailable: 'Please create a summary',
 
   uploadingVideo: 'Uploading Video',
   CreatingEmbedding: 'Creating Embedding',

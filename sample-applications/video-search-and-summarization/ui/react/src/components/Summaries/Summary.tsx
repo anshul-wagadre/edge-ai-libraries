@@ -94,10 +94,8 @@ const SummaryTitle = styled.div`
 `;
 
 const NothingSelected = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  justify-content: center;
+  opacity: 0.6;
+  padding: 0 2rem;
 `;
 
 const Spacer = styled.span`
@@ -119,7 +117,7 @@ export const Summary: FC = () => {
   const { t } = useTranslation();
 
   const dispatch = useAppDispatch();
-  const { selectedSummary } = useAppSelector(SummarySelector);
+  const { selectedSummary, sidebarSummaries } = useAppSelector(SummarySelector);
   const { getVideoUrl } = useAppSelector(videosSelector);
 
   const [systemConfig, setSystemConfig] = useState<SystemConfigWithMeta>();
@@ -147,7 +145,12 @@ export const Summary: FC = () => {
   };
 
   const NoItemsSelected = () => {
-    return <NothingSelected>{t('selectASummary')}</NothingSelected>;
+    return (
+      <NothingSelected>
+        {sidebarSummaries.length > 0 && <h3>{t('selectASummaryFromSidebar')}</h3>}
+        {sidebarSummaries.length === 0 && <h3>{t('noSummariesAvailable')}</h3>}
+      </NothingSelected>
+    );
   };
 
   const handleSummaryData = (data: UIState) => {

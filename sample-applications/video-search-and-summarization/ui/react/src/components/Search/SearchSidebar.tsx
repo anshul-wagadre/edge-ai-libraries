@@ -70,7 +70,7 @@ export const SearchSidebar: FC = () => {
         <Navigation>
           {t('Queries')}
           <span className='spacer'></span>
-          <IconButton kind='ghost' label={t('Refetch')} onClick={() => dispatch(SearchLoad())} size='sm'>
+          <IconButton kind='ghost' label={t('Refetch')} autoAlign onClick={() => dispatch(SearchLoad())} size='sm'>
             <Renew />
           </IconButton>
         </Navigation>

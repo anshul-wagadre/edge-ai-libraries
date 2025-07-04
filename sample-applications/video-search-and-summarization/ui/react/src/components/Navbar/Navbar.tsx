@@ -79,7 +79,7 @@ const Navbar: FC = () => {
     const hasSearch = FEATURE_SEARCH == FEATURE_STATE.ON;
     const hasSummary = FEATURE_SUMMARY == FEATURE_STATE.ON;
     if (hasSearch && hasSummary) {
-      return t('CreateVideoEmbedding');
+      return t('SummarizeVideo');
     } else if (hasSearch) {
       return t('CreateVideoEmbedding');
     } else {

@@ -30,7 +30,9 @@ export const SearchModal: FC<SearchModalProps> = ({ showModal, closeModal }) => 
       dispatch(SearchAdd(query));
       resetInput();
       closeModal();
-    } catch (err) {}
+    } catch (err) {
+      console.error('Error submitting search:', err);
+    }
   };
 
   return (
