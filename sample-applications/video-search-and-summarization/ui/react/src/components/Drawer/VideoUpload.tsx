@@ -9,7 +9,7 @@ import {
   SelectItem,
   TextInput,
 } from '@carbon/react';
-import axios, { AxiosError, AxiosProgressEvent, AxiosResponse } from 'axios';
+import axios, { AxiosProgressEvent, AxiosResponse } from 'axios';
 import { FC, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
