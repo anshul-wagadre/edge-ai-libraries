@@ -25,6 +25,7 @@ import { VideoDTO, VideoRO } from '../../redux/video/video';
 import { SummaryPipelineDTO, SummaryPipelinRO } from '../../redux/summary/summaryPipeline';
 import { videosLoad } from '../../redux/video/videoSlice';
 import { useAppDispatch } from '../../redux/store';
+import { MuxFeatures } from '../../redux/ui/ui.model';
 
 export interface VideoUploadProps {
   closeDrawer: () => void;
@@ -106,7 +107,7 @@ export const VideoUpload: FC<VideoUploadProps> = ({ closeDrawer, isOpen }) => {
   const minDuration: number = 2;
   const minFrames: number = 2;
   const defaultSampleFrames: number = 8;
-  const defaultChunkDuration: number = 3;
+  const defaultChunkDuration: number = 8;
   const defaultOverlap: number = 4;
 
   const dispatch = useAppDispatch();
@@ -327,21 +328,27 @@ export const VideoUpload: FC<VideoUploadProps> = ({ closeDrawer, isOpen }) => {
             dispatch(SummaryActions.selectSummary(piplineRes.summaryPipelineId));
             dispatch(VideoChunkActions.setSelectedSummary(piplineRes.summaryPipelineId));
             dispatch(VideoFramesAction.selectSummary(piplineRes.summaryPipelineId));
+            dispatch(UIActions.setMux(MuxFeatures.SUMMARY));
             closeDrawer();
           }
         }
       }
     } catch (error: any) {
       console.log('ERROR', error);
-      if (error.reponse && error.response.data) {
-        notify(error.response.data, NotificationSeverity.ERROR);
-      } else if (error.request) {
-        notify(error.request, NotificationSeverity.ERROR);
-      } else if (error instanceof AxiosError && error.message) {
-        notify(error.message, NotificationSeverity.ERROR);
-      } else {
-        notify(t('error'), NotificationSeverity.ERROR);
+
+      if (error.response && error.response.data && error.response.data.message) {
+        notify(error.response.data.message, NotificationSeverity.ERROR);
       }
+
+      // if (error.reponse && error.response.data) {
+      //   notify(error.response.data.message, NotificationSeverity.ERROR);
+      // } else if (error.request) {
+      //   notify(error.request, NotificationSeverity.ERROR);
+      // } else if (error instanceof AxiosError && error.message) {
+      //   notify(error.message, NotificationSeverity.ERROR);
+      // } else {
+      //   notify(t('error'), NotificationSeverity.ERROR);
+      // }
 
       setUploading(false);
       setProgressText(t('error'));

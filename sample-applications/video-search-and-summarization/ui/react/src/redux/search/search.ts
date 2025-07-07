@@ -1,6 +1,6 @@
 export interface SearchQueryDTO {
   query: string;
-  tags?: string[];
+  tags?: string;
 }
 
 export interface SearchShimQuery {
@@ -21,6 +21,7 @@ export interface SearchResult {
   metadata: {
     bucket_name: string;
     clip_duration: number;
+    tags: string;
     date: string;
     date_time: string;
     day: number;
@@ -65,7 +66,12 @@ export interface SearchQueryUI extends SearchQuery {
 
 export interface SearchState {
   searchQueries: SearchQueryUI[];
+  suggestedTags: string[];
   unreads: string[];
   selectedQuery: string | null;
   triggerLoad: boolean;
+  status: {
+    refetching: string[];
+    adding: number;
+  };
 }

@@ -42,7 +42,7 @@ const App: FC = () => {
 
           socket.emit('join', summaryId);
 
-          const prefix = `sync/${summaryId}`;
+          const prefix = `summary:sync/${summaryId}`;
 
           socket.on(`${prefix}/status`, (statusData: UIStateStatus) => {
             dispatch(
@@ -94,7 +94,7 @@ const App: FC = () => {
           });
 
           // socket.on(
-          //   `sync/${summaryId}/summaryStream`,
+          //   `summary:sync/${summaryId}/summaryStream`,
           //   (data: SummaryStreamChunk) => {
           //     dispatch(SummaryActions.updateSummaryChunk(data));
           //   },

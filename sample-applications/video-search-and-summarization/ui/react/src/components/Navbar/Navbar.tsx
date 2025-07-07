@@ -14,6 +14,7 @@ import { useAppDispatch } from '../../redux/store.ts';
 import { videosLoad } from '../../redux/video/videoSlice.ts';
 import { SearchModal } from '../PopupModal/SearchModal.tsx';
 import { FEATURE_STATE } from '../../utils/constant.ts';
+import { LoadTags } from '../../redux/search/searchSlice.ts';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -121,6 +122,7 @@ const Navbar: FC = () => {
             kind='primary'
             disabled={false}
             onClick={() => {
+              dispatch(LoadTags());
               setShowSearchModal(true);
             }}
           >

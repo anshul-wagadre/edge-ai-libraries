@@ -128,9 +128,7 @@ export const Summary: FC = () => {
       getConfig();
       socket.emit('join', selectedSummary.stateId);
 
-      socket.on(`sync/${selectedSummary.stateId}`, (data: UIState) => {
-        console.log(data);
-
+      socket.on(`summary:sync/${selectedSummary.stateId}`, (data: UIState) => {
         const uiState: UIState = data;
         handleSummaryData(uiState);
       });

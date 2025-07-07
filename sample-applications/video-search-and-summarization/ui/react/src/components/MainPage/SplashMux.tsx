@@ -1,9 +1,12 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import SummaryMainContainer from '../Summaries/SummaryContainer';
 import SearchMainContainer from '../Search/SearchContainer';
 import { IconButton } from '@carbon/react';
 import { DataAnalytics, Sigma } from '@carbon/react/icons';
 import styled from 'styled-components';
+import { useAppDispatch, useAppSelector } from '../../redux/store';
+import { UIActions, uiSelector } from '../../redux/ui/ui.slice';
+import { MuxFeatures } from '../../redux/ui/ui.model';
 
 const SuperSidebar = styled.div`
   display: flex;
@@ -15,12 +18,8 @@ const SuperSidebar = styled.div`
 `;
 
 export const SplashSummarySearch: FC = () => {
-  enum MuxFeatures {
-    SEARCH,
-    SUMMARY,
-  }
-
-  const [mux, setMux] = useState<MuxFeatures>(MuxFeatures.SEARCH);
+  const dispatch = useAppDispatch();
+  const { selectedMux } = useAppSelector(uiSelector);
 
   return (
     <>
@@ -28,23 +27,23 @@ export const SplashSummarySearch: FC = () => {
         <IconButton
           align='right'
           label='Summary'
-          onClick={() => setMux(MuxFeatures.SUMMARY)}
-          kind={mux == MuxFeatures.SUMMARY ? 'primary' : 'ghost'}
+          onClick={() => dispatch(UIActions.setMux(MuxFeatures.SUMMARY))}
+          kind={selectedMux == MuxFeatures.SUMMARY ? 'primary' : 'ghost'}
         >
           <Sigma />
         </IconButton>
         <IconButton
           align='right'
           label='Search'
-          onClick={() => setMux(MuxFeatures.SEARCH)}
-          kind={mux == MuxFeatures.SEARCH ? 'primary' : 'ghost'}
+          onClick={() => dispatch(UIActions.setMux(MuxFeatures.SEARCH))}
+          kind={selectedMux == MuxFeatures.SEARCH ? 'primary' : 'ghost'}
         >
           <DataAnalytics />
         </IconButton>
       </SuperSidebar>
 
-      {MuxFeatures.SUMMARY === mux && <SummaryMainContainer />}
-      {MuxFeatures.SEARCH === mux && <SearchMainContainer />}
+      {MuxFeatures.SUMMARY === selectedMux && <SummaryMainContainer />}
+      {MuxFeatures.SEARCH === selectedMux && <SearchMainContainer />}
     </>
   );
 };

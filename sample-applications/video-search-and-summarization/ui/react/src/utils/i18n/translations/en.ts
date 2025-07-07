@@ -6,6 +6,7 @@ export const enTranslations = {
   videoTags: 'Video tags (separated by commas)',
 
   SearchVideo: 'Search Videos',
+  SearchRerun: 'Re-run search',
   videoSearchStart: 'Video Search Query',
   SearchingForPlaceholder: 'Red bus or white plane...',
   search: 'Search',
@@ -17,6 +18,9 @@ export const enTranslations = {
   EmbeddingsCreated: 'Embeddings Created',
   selectASummaryFromSidebar: 'Select a Summary from the sidebar',
   noSummariesAvailable: 'Please create a summary',
+  tagsLabel: 'Filter Tags',
+  tagsHelperText: 'Select tags to filter the results',
+  AddingSearches: '({{count}}) search in progress',
 
   uploadingVideo: 'Uploading Video',
   CreatingEmbedding: 'Creating Embedding',

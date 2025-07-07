@@ -1,19 +1,17 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { OpenPromptModal, UISliceState } from './ui.model';
+import { MuxFeatures, OpenPromptModal, UISliceState } from './ui.model';
 import { RootState } from '../store';
 
 export const initialState: UISliceState = {
   promptEditing: null,
+  selectedMux: MuxFeatures.SUMMARY,
 };
 
 export const UISlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    openPromptModal: (
-      state: UISliceState,
-      action: PayloadAction<OpenPromptModal>,
-    ) => {
+    openPromptModal: (state: UISliceState, action: PayloadAction<OpenPromptModal>) => {
       const { heading, openToken, prompt } = action.payload;
 
       const vars: Set<string> = new Set();
@@ -42,6 +40,10 @@ export const UISlice = createSlice({
       }
     },
 
+    setMux: (state: UISliceState, action: PayloadAction<MuxFeatures>) => {
+      state.selectedMux = action.payload;
+    },
+
     closePrompt: (state: UISliceState) => {
       state.promptEditing = null;
     },
@@ -56,6 +58,7 @@ export const uiSelector = createSelector([selectUIState], (uiState) => ({
   modalHeading: uiState.promptEditing?.heading ?? '',
   modalPrompt: uiState.promptEditing?.prompt ?? '',
   modalPromptVars: uiState.promptEditing?.vars ?? [],
+  selectedMux: uiState.selectedMux,
 }));
 
 export const UIReducer = UISlice.reducer;
