@@ -387,6 +387,7 @@ if [ "$1" = "--summary" ] || [ "$1" = "--all" ]; then
     # Turn on feature flags for summarization and turn off search
     export SUMMARY_FEATURE="FEATURE_ON"
     export SEARCH_FEATURE="FEATURE_OFF"
+    export APP_FEATURE_MUX="ATOMIC"
 
     # If summarization is enabled, set up the environment for OVMS or VLM for summarization
     [ "$1" = "--summary" ] && APP_COMPOSE_FILE="-f docker/compose.base.yaml -f docker/compose.summary.yaml" && \
@@ -398,12 +399,13 @@ if [ "$1" = "--summary" ] || [ "$1" = "--all" ]; then
         docker volume create data-prep && \
         export SEARCH_FEATURE="FEATURE_ON" && \
         export USE_ONLY_TEXT_EMBEDDINGS=True && \
+        export APP_FEATURE_MUX="SUMMARY_SEARCH" && \
         APP_COMPOSE_FILE="-f docker/compose.base.yaml -f docker/compose.summary.yaml -f docker/compose.search.yaml" && \
         echo -e  "${GREEN}Setting up both applications: Video Summarization and Video Search${NC}"
 
-    # Check if the object detection model directory exists or whether docker-compose config is requested
-    if [ ! -d "${OD_MODEL_OUTPUT_DIR}" ] && [ "$2" != "config" ]; then
-        echo -e  "${YELLOW}Object detection model directory does not exist. Creating it...${NC}"
+    # Check if the object detection model directory exists or is empty or whether docker-compose config is requested
+    if [ ! -d "${OD_MODEL_OUTPUT_DIR}" ] && [ -z "${OD_MODEL_OUTPUT_DIR}" ] && [ "$2" != "config" ]; then
+        echo -e  "${YELLOW}Object detection model directory does not exist, or is empty. Creating it...${NC}"
         mkdir -p "${OD_MODEL_OUTPUT_DIR}"
         convert_object_detection_models
     else
@@ -506,6 +508,7 @@ elif [ "$1" = "--search" ]; then
     # Turn on feature flags for search and turn off summarization
     export SUMMARY_FEATURE="FEATURE_OFF"
     export SEARCH_FEATURE="FEATURE_ON"
+    export APP_FEATURE_MUX="ATOMIC"
     export USE_ONLY_TEXT_EMBEDDINGS=False  # When only search is enabled, we use both text and video embeddings
 
     # If search is enabled, set up video search only

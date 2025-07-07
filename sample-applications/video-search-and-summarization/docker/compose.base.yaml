@@ -47,7 +47,7 @@ services:
       https_proxy: ${https_proxy}
       APP_ENDPOINT_URL: ${UI_PM_ENDPOINT}
       APP_ASSETS_URL: ${UI_ASSETS_ENDPOINT}
-      APP_FEATURE_MUX: ATOMIC
+      APP_FEATURE_MUX: ${APP_FEATURE_MUX}
     depends_on:
       pipeline-manager:
         condition: service_started
