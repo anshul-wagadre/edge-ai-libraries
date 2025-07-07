@@ -128,6 +128,7 @@ export class SearchStateService {
       );
 
       await Promise.all(reRunPromises);
+      this.$emitter.emit(SocketEvent.SEARCH_NOTIFICATION);
     }
   }
 }

@@ -5,7 +5,11 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { PipelineEvents, SummaryStreamChunk } from 'src/events/Pipeline.events';
+import {
+  PipelineEvents,
+  SearchEvents,
+  SummaryStreamChunk,
+} from 'src/events/Pipeline.events';
 import {
   SocketEvent,
   SocketFrameSummarySyncDTO,
@@ -25,6 +29,11 @@ export class EventsGateway {
 
   constructor(private $ui: UiService) {}
 
+  @OnEvent(SocketEvent.SEARCH_NOTIFICATION)
+  searchNotification() {
+    this.server.emit('search:sync');
+  }
+
   @OnEvent(SocketEvent.STATE_SYNC)
   syncState(payload: SocketStateSyncPayload) {
     const { stateId } = payload;
@@ -32,7 +41,7 @@ export class EventsGateway {
     const uiState = this.$ui.getUiState(stateId);
 
     if (uiState) {
-      this.server.to(stateId).emit(`sync/${stateId}`, uiState);
+      this.server.to(stateId).emit(`summary:sync/${stateId}`, uiState);
     }
   }
 
@@ -43,7 +52,9 @@ export class EventsGateway {
     const stateStatus = this.$ui.getStateStatus(stateId);
 
     if (stateStatus) {
-      this.server.to(stateId).emit(`sync/${stateId}/status`, stateStatus);
+      this.server
+        .to(stateId)
+        .emit(`summary:sync/${stateId}/status`, stateStatus);
     }
   }
 
@@ -52,7 +63,9 @@ export class EventsGateway {
     const chunks = this.$ui.getUIChunks(stateId);
     const frames = this.$ui.getUIFrames(stateId);
 
-    this.server.to(stateId).emit(`sync/${stateId}/chunks`, { chunks, frames });
+    this.server
+      .to(stateId)
+      .emit(`summary:sync/${stateId}/chunks`, { chunks, frames });
   }
 
   @OnEvent(SocketEvent.FRAME_SUMMARY_SYNC)
@@ -60,9 +73,10 @@ export class EventsGateway {
     const frameSummary = this.$ui.getSummaryData(stateId, frameKey);
 
     if (frameSummary) {
-      this.server
-        .to(stateId)
-        .emit(`sync/${stateId}/frameSummary`, { stateId, ...frameSummary });
+      this.server.to(stateId).emit(`summary:sync/${stateId}/frameSummary`, {
+        stateId,
+        ...frameSummary,
+      });
     }
   }
 
@@ -72,33 +86,25 @@ export class EventsGateway {
 
     this.server
       .to(stateId)
-      .emit(`sync/${stateId}/inferenceConfig`, inferenceConfig);
+      .emit(`summary:sync/${stateId}/inferenceConfig`, inferenceConfig);
   }
 
   @OnEvent(SocketEvent.SUMMARY_SYNC)
   summarySync({ stateId, summary }: { stateId: string; summary: string }) {
     this.server
       .to(stateId)
-      .emit(`sync/${stateId}/summary`, { stateId, summary });
+      .emit(`summary:sync/${stateId}/summary`, { stateId, summary });
   }
 
   @OnEvent(PipelineEvents.SUMMARY_STREAM)
   summaryStream({ stateId, streamChunk }: SummaryStreamChunk) {
-    this.server.to(stateId).emit(`sync/${stateId}/summaryStream`, streamChunk);
+    this.server
+      .to(stateId)
+      .emit(`summary:sync/${stateId}/summaryStream`, streamChunk);
   }
 
   @SubscribeMessage('join')
-  handleJoin(client: Socket, roomName: string) {
-    client.join(roomName);
-  }
-
-  @SubscribeMessage('stop')
-  handleStop(client: any, payload: { stateId: string }): string {
-    return 'Pipeline stop registered';
-  }
-
-  @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
-    return 'Hello world!';
+  async handleJoin(client: Socket, roomName: string) {
+    await client.join(roomName);
   }
 }

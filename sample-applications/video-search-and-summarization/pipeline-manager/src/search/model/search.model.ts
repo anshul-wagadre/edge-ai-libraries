@@ -1,6 +1,6 @@
 export interface SearchQueryDTO {
   query: string;
-  tags?: string[];
+  tags?: string;
 }
 
 export interface SearchShimQuery {
@@ -74,6 +74,7 @@ export interface DataPrepSummaryDTO {
   video_summary: string;
   video_start_time: number;
   video_end_time: number;
+  tags: string[];
 }
 
 export interface DataPrepMinioRO {

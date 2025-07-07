@@ -30,6 +30,11 @@ export class SearchController {
     return await this.$searchDB.readAll();
   }
 
+  @Get('watched')
+  async getWatchedQueries() {
+    return await this.$searchDB.readAllWatched();
+  }
+
   @Get(':queryId')
   async getQuery(@Param() params: { queryId: string }) {
     return await this.$searchDB.read(params.queryId);
@@ -38,13 +43,19 @@ export class SearchController {
   @Post('')
   async addQuery(@Body() reqBody: SearchQueryDTO) {
     try {
-      const query = await this.$search.addQuery(
-        reqBody.query,
-        reqBody.tags ?? [],
-      );
+      let tags: string[] = [];
+
+      const searchQuery = reqBody.query;
+
+      if (reqBody.tags && reqBody.tags.length > 0) {
+        tags = reqBody.tags.split(',').map((tag) => tag.trim());
+      }
+
+      const query = await this.$search.addQuery(searchQuery, tags);
       return query;
     } catch (error) {
       Logger.error('Error adding query', error);
+      throw new BadRequestException('Error adding query');
     }
   }
 

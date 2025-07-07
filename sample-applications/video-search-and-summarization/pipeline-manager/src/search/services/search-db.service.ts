@@ -25,6 +25,13 @@ export class SearchDbService {
     return searches ?? [];
   }
 
+  async readAllWatched(): Promise<SearchEntity[]> {
+    const searches = await this.searchRepo.find({
+      where: { watch: true },
+    });
+    return searches ?? [];
+  }
+
   async read(queryId: string): Promise<SearchEntity | null> {
     const search = await this.searchRepo.findOne({
       where: { queryId },

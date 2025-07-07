@@ -340,6 +340,7 @@ export class ChunkingService {
         video_summary: caption,
         video_start_time: chunkStartTime,
         video_end_time: chunkEndTime,
+        tags: state.video.tags,
       };
 
       this.$searchDataPrep.createEmbeddingsFromSummary(embeddingDTO).subscribe({
