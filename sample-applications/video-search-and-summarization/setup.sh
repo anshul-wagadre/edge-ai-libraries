@@ -404,8 +404,8 @@ if [ "$1" = "--summary" ] || [ "$1" = "--all" ]; then
         echo -e  "${GREEN}Setting up both applications: Video Summarization and Video Search${NC}"
 
     # Check if the object detection model directory exists or is empty or whether docker-compose config is requested
-    if [ ! -d "${OD_MODEL_OUTPUT_DIR}" ] && [ -z "${OD_MODEL_OUTPUT_DIR}" ] && [ "$2" != "config" ]; then
-        echo -e  "${YELLOW}Object detection model directory does not exist, or is empty. Creating it...${NC}"
+    if { [ ! -d "${OD_MODEL_OUTPUT_DIR}" ] || [ -z "$(ls -A "${OD_MODEL_OUTPUT_DIR}" 2>/dev/null)" ]; } && [ "$2" != "config" ]; then
+        echo -e  "${YELLOW}Object detection model directory does not exist or is empty. Creating it...${NC}"
         mkdir -p "${OD_MODEL_OUTPUT_DIR}"
         convert_object_detection_models
     else
