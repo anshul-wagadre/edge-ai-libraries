@@ -51,7 +51,7 @@ export class SearchController {
         tags = reqBody.tags.split(',').map((tag) => tag.trim());
       }
 
-      const query = await this.$search.addQuery(searchQuery, tags);
+      const query = await this.$search.newQuery(searchQuery, tags);
       return query;
     } catch (error) {
       Logger.error('Error adding query', error);

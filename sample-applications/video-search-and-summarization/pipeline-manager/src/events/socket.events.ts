@@ -16,6 +16,7 @@ export enum SocketEvent {
   FRAME_SUMMARY_SYNC = 'socket.frame.summary',
 
   SEARCH_NOTIFICATION = 'socket.search.notification',
+  SEARCH_UPDATE = 'socket.search.update',
 }
 
 export interface SocketStateSyncPayload {

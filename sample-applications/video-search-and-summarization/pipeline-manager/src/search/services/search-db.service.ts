@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SearchEntity } from '../model/search.entity';
 import { Repository } from 'typeorm';
-import { SearchQuery, SearchResult } from '../model/search.model';
+import {
+  SearchQuery,
+  SearchQueryStatus,
+  SearchResult,
+} from '../model/search.model';
 
 @Injectable()
 export class SearchDbService {
@@ -18,6 +22,19 @@ export class SearchDbService {
       updatedAt: new Date().toISOString(),
     });
     return this.searchRepo.save(newSearch);
+  }
+
+  async updateQueryStatus(
+    queryId: string,
+    status: SearchQueryStatus,
+  ): Promise<SearchEntity | null> {
+    const search = await this.read(queryId);
+    if (!search) {
+      return null;
+    }
+    search.queryStatus = status;
+    search.updatedAt = new Date().toISOString();
+    return this.searchRepo.save(search);
   }
 
   async readAll(): Promise<SearchEntity[]> {
@@ -46,6 +63,7 @@ export class SearchDbService {
     }
     search.results = [...results];
     search.updatedAt = new Date().toISOString();
+    search.queryStatus = SearchQueryStatus.IDLE;
     return this.searchRepo.save(search);
   }
 

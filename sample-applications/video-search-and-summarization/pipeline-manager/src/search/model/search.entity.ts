@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { SearchResult } from './search.model';
+import { SearchQueryStatus, SearchResult } from './search.model';
 
 @Entity('search')
 export class SearchEntity {
@@ -14,6 +14,13 @@ export class SearchEntity {
 
   @Column({ type: 'boolean', default: false })
   watch: boolean;
+
+  @Column({
+    type: 'enum',
+    default: SearchQueryStatus.IDLE,
+    enum: SearchQueryStatus,
+  })
+  queryStatus: SearchQueryStatus; // This can be 'idle' or 'running'
 
   @Column({ type: 'text', array: true, default: [] })
   tags: string[];

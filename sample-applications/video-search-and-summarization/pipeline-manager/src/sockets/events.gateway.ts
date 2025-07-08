@@ -15,6 +15,8 @@ import {
   SocketFrameSummarySyncDTO,
   SocketStateSyncPayload,
 } from 'src/events/socket.events';
+import { SearchEntity } from 'src/search/model/search.entity';
+import { SearchQuery } from 'src/search/model/search.model';
 import { UiService } from 'src/state-manager/services/ui.service';
 
 @WebSocketGateway({
@@ -32,6 +34,11 @@ export class EventsGateway {
   @OnEvent(SocketEvent.SEARCH_NOTIFICATION)
   searchNotification() {
     this.server.emit('search:sync');
+  }
+
+  @OnEvent(SocketEvent.SEARCH_UPDATE)
+  searchUpdate(payload: SearchQuery) {
+    this.server.emit('search:update', payload);
   }
 
   @OnEvent(SocketEvent.STATE_SYNC)

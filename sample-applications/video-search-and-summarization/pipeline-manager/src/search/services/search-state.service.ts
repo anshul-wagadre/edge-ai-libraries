@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   SearchQuery,
+  SearchQueryStatus,
   SearchResultBody,
   SearchShimQuery,
 } from '../model/search.model';
@@ -28,33 +29,18 @@ export class SearchStateService {
       watch: false,
       results: [],
       tags,
+      queryStatus: SearchQueryStatus.RUNNING,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    Logger.log('Search', searchQuery);
-
-    console.log(searchQuery);
+    Logger.log('Search Query', searchQuery);
 
     const res = await this.$searchDB.create(searchQuery);
+
+    this.$emitter.emit(SearchEvents.RUN_QUERY, res.queryId);
+
     return res;
-  }
-
-  async addQuery(query: string, tags: string[]) {
-    const searchQuery = await this.newQuery(query, tags);
-    const results = await this.runSearch(searchQuery.queryId, query, tags);
-
-    const promises: Promise<SearchEntity | null>[] = [];
-
-    for (const result of results.results) {
-      promises.push(this.updateResults(searchQuery.queryId, result));
-    }
-
-    await Promise.all(promises);
-
-    const freshEntity = await this.$searchDB.read(searchQuery.queryId);
-
-    return freshEntity;
   }
 
   async addToWatch(queryId: string) {
@@ -65,11 +51,20 @@ export class SearchStateService {
     await this.$searchDB.updateWatch(queryId, false);
   }
 
+  @OnEvent(SearchEvents.RUN_QUERY)
   async reRunQuery(queryId: string) {
     const query = await this.$searchDB.read(queryId);
     if (!query) {
       throw new Error(`Query with ID ${queryId} not found`);
     }
+
+    const updatedQuery = await this.$searchDB.updateQueryStatus(
+      queryId,
+      SearchQueryStatus.RUNNING,
+    );
+
+    this.$emitter.emit(SocketEvent.SEARCH_UPDATE, updatedQuery);
+
     const results = await this.runSearch(queryId, query.query, query.tags);
     if (results.results.length > 0) {
       const relevantResults = results.results.find(
@@ -78,11 +73,6 @@ export class SearchStateService {
 
       if (relevantResults) {
         const freshEntity = await this.updateResults(queryId, relevantResults);
-
-        if (freshEntity?.watch) {
-          this.$emitter.emit(SocketEvent.SEARCH_NOTIFICATION, { queryId });
-        }
-
         return freshEntity;
       }
       return null;
@@ -107,9 +97,12 @@ export class SearchStateService {
   async updateResults(queryId: string, results: SearchResultBody) {
     const query = await this.$searchDB.addResults(queryId, results.results);
     if (query) {
-      if (query.watch) {
-        this.$emitter.emit(SocketEvent.SEARCH_NOTIFICATION, { queryId });
-      }
+      await this.$searchDB.updateQueryStatus(
+        query.queryId,
+        SearchQueryStatus.IDLE,
+      );
+
+      this.$emitter.emit(SocketEvent.SEARCH_UPDATE, query);
     }
     return query;
   }
@@ -119,7 +112,7 @@ export class SearchStateService {
     const queries = await this.$searchDB.readAll();
 
     const queriesOnWatch: SearchQuery[] = queries.filter(
-      (query) => !query.watch,
+      (query) => query.watch,
     );
 
     if (queriesOnWatch.length > 0) {

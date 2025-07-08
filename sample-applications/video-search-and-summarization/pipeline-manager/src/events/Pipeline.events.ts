@@ -28,6 +28,7 @@ export enum PipelineEvents {
 
 export enum SearchEvents {
   EMBEDDINGS_UPDATE = 'search.embeddings.update',
+  RUN_QUERY = 'search.run.query',
 }
 
 export enum PipelineErrors {}

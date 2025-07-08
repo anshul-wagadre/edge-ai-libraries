@@ -3,6 +3,11 @@ export interface SearchQueryDTO {
   tags?: string;
 }
 
+export enum SearchQueryStatus {
+  IDLE = 'idle',
+  RUNNING = 'running',
+}
+
 export interface SearchShimQuery {
   query_id: string;
   query: string;
@@ -55,6 +60,7 @@ export interface SearchQuery {
   query: string;
   watch: boolean;
   results: SearchResult[];
+  queryStatus: SearchQueryStatus;
   tags: string[];
   createdAt: string;
   updatedAt: string;
