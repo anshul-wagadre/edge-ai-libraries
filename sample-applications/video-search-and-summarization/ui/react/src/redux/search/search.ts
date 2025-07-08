@@ -49,12 +49,18 @@ export interface SearchResult {
   type: string;
 }
 
+export enum SearchQueryStatus {
+  IDLE = 'idle',
+  RUNNING = 'running',
+}
+
 export interface SearchQuery {
   dbId?: number;
   queryId: string;
   query: string;
   watch: boolean;
   results: SearchResult[];
+  queryStatus: SearchQueryStatus;
   tags: string[];
   createdAt: string;
   updatedAt: string;
@@ -70,8 +76,4 @@ export interface SearchState {
   unreads: string[];
   selectedQuery: string | null;
   triggerLoad: boolean;
-  status: {
-    refetching: string[];
-    adding: number;
-  };
 }

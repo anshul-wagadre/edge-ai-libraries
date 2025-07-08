@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SearchQuery, SearchQueryDTO, SearchQueryUI, SearchResult, SearchState } from './search';
+import { SearchQuery, SearchQueryDTO, SearchQueryStatus, SearchQueryUI, SearchResult, SearchState } from './search';
 import { RootState } from '../store';
 import axios from 'axios';
 import { APP_URL } from '../../config';
@@ -10,10 +10,6 @@ const initialState: SearchState = {
   selectedQuery: null,
   triggerLoad: true,
   suggestedTags: [],
-  status: {
-    refetching: [],
-    adding: 0,
-  },
 };
 
 export const SearchSlice = createSlice({
@@ -26,9 +22,10 @@ export const SearchSlice = createSlice({
           const index = state.searchQueries.findIndex((query) => query.queryId === action.payload);
           if (index !== -1) {
             state.selectedQuery = action.payload;
-            state.unreads = state.unreads.filter((id) => id !== action.payload);
           }
         }
+
+        state.unreads = state.unreads.filter((id) => id !== action.payload);
       }
     },
     removeSearchQuery: (state: SearchState, action) => {
@@ -37,8 +34,11 @@ export const SearchSlice = createSlice({
     updateSearchQuery: (state: SearchState, action) => {
       const index = state.searchQueries.findIndex((query) => query.queryId === action.payload.queryId);
       if (index !== -1) {
-        state.searchQueries[index] = { ...state.searchQueries[index], ...action.payload };
+        state.searchQueries[index] = { ...state.searchQueries[index], ...action.payload, topK: 10 };
+      } else {
+        state.searchQueries.push({ ...action.payload, topK: 10 });
       }
+      state.unreads.push(action.payload.queryId);
     },
     syncSearch: (state: SearchState, action) => {
       const index = state.searchQueries.findIndex((query) => query.queryId === action.payload.queryId);
@@ -58,37 +58,6 @@ export const SearchSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(SyncWatched.pending, (state) => {
-        const watchedQueries = state.searchQueries.filter((query) => query.watch);
-        for (const query of watchedQueries) {
-          state.status.refetching.push(query.queryId);
-        }
-      })
-      .addCase(SyncWatched.fulfilled, (state, action) => {
-        const watchedQueries = state.searchQueries.filter((query) => query.watch);
-        const watchedQueryIds = watchedQueries.map((query) => query.queryId);
-        state.status.refetching = state.status.refetching.filter((id) => !watchedQueryIds.includes(id));
-        state.unreads = [...state.unreads, ...watchedQueryIds];
-
-        const syncKeyed = action.payload.reduce(
-          (acc, curr) => {
-            acc[curr.queryId] = curr;
-            return acc;
-          },
-          {} as Record<string, SearchQuery>,
-        );
-
-        const syncKeys = Object.keys(syncKeyed);
-
-        const updatedQueries = state.searchQueries.map((curr) => {
-          if (syncKeys.includes(curr.queryId)) {
-            return { ...curr, ...syncKeyed[curr.queryId] };
-          }
-          return curr;
-        });
-
-        state.searchQueries = updatedQueries;
-      })
       .addCase(SearchLoad.fulfilled, (state, action) => {
         state.triggerLoad = false;
         if (action.payload.length === 0) {
@@ -112,26 +81,15 @@ export const SearchSlice = createSlice({
         state.triggerLoad = false;
         state.searchQueries = [];
       })
-      .addCase(RerunSearch.pending, (state, action) => {
-        state.status.refetching.push(action.meta.arg);
-      })
       .addCase(RerunSearch.fulfilled, (state, action) => {
         const index = state.searchQueries.findIndex((query) => query.queryId === action.payload.queryId);
         if (index !== -1) {
           state.searchQueries[index] = { ...state.searchQueries[index], ...action.payload };
         }
-        state.status.refetching = state.status.refetching.filter((id) => id !== action.payload.queryId);
-      })
-      .addCase(RerunSearch.rejected, (state, action) => {
-        state.status.refetching = state.status.refetching.filter((id) => id !== action.meta.arg);
-      })
-      .addCase(SearchAdd.pending, (state) => {
-        state.status.adding += 1;
       })
       .addCase(SearchAdd.fulfilled, (state, action) => {
         state.searchQueries.push({ ...action.payload, topK: 10 });
         state.selectedQuery = action.payload.queryId;
-        state.status.adding = state.status.adding > 0 ? state.status.adding - 1 : 0;
       })
       .addCase(SearchWatch.fulfilled, (state) => {
         state.triggerLoad = true;
@@ -140,11 +98,6 @@ export const SearchSlice = createSlice({
         state.triggerLoad = true;
       });
   },
-});
-
-export const SyncWatched = createAsyncThunk('search/syncWatched', async () => {
-  const res = await axios.get<SearchQuery[]>(`${APP_URL}/search/watched`);
-  return res.data;
 });
 
 export const LoadTags = createAsyncThunk('search/loadTags', async () => {
@@ -202,7 +155,13 @@ export const SearchSelector = createSelector([selectSearchState], (state) => ({
   triggerLoad: state.triggerLoad,
   selectedQuery: state.searchQueries.find((el) => el.queryId == state.selectedQuery),
   suggestedTags: state.suggestedTags,
-  activeSearchAdd: state.status.adding,
+  queriesInProgress: state.searchQueries.filter((query) => query.queryStatus === SearchQueryStatus.RUNNING),
+  isSelectedInProgress:
+    state.selectedQuery &&
+    state.searchQueries
+      .filter((query) => query.queryStatus === SearchQueryStatus.RUNNING)
+      .map((curr) => curr.queryId)
+      .includes(state.selectedQuery),
   selectedResults: state.searchQueries.reduce((acc: SearchResult[], curr: SearchQueryUI) => {
     if (curr.queryId === state.selectedQuery) {
       if (!curr || !curr.results || (curr.results && curr.results.length <= 0)) {

@@ -16,8 +16,10 @@ import {
 } from './redux/summary/summary.ts';
 import { VideoFramesAction } from './redux/summary/videoFrameSlice.ts';
 import { VideoChunkActions } from './redux/summary/videoChunkSlice.ts';
-import { FEATURE_MUX } from './config.ts';
-import { FeatureMux } from './utils/constant.ts';
+import { FEATURE_MUX, FEATURE_SEARCH } from './config.ts';
+import { FEATURE_STATE, FeatureMux } from './utils/constant.ts';
+import { SearchActions } from './redux/search/searchSlice.ts';
+import { SearchQuery } from './redux/search/search.ts';
 
 const App: FC = () => {
   const { summaryIds } = useAppSelector(SummarySelector);
@@ -92,6 +94,12 @@ const App: FC = () => {
               }),
             );
           });
+
+          if (FEATURE_SEARCH === FEATURE_STATE.ON) {
+            socket.on('search:update', (data: SearchQuery) => {
+              dispatch(SearchActions.updateSearchQuery(data));
+            });
+          }
 
           // socket.on(
           //   `summary:sync/${summaryId}/summaryStream`,

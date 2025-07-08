@@ -22,6 +22,7 @@ export const enTranslations = {
   tagsHelperText: 'Select tags to filter the results',
   AddingSearches: '({{count}}) search in progress',
   topK: 'Search Output Count',
+  searchInProgress: 'searching',
 
   uploadingVideo: 'Uploading Video',
   CreatingEmbedding: 'Creating Embedding',

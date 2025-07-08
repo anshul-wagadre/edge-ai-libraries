@@ -95,7 +95,7 @@ const TagsContainer = styled.div`
 `;
 
 export const SearchContent: FC = () => {
-  const { selectedQuery, selectedResults } = useAppSelector(SearchSelector);
+  const { selectedQuery, selectedResults, isSelectedInProgress } = useAppSelector(SearchSelector);
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
 
@@ -129,6 +129,11 @@ export const SearchContent: FC = () => {
           </TagsContainer>
         )}
         <span className='spacer'></span>
+        {isSelectedInProgress && (
+          <Tag size='sm' type='blue'>
+            {t('searchInProgress')}
+          </Tag>
+        )}
         {selectedQuery && (
           <>
             <SliderLabel>{t('topK')}</SliderLabel>

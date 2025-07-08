@@ -42,7 +42,7 @@ export const StyledIconButton = styled(IconButton)`
 `;
 
 export const SearchSidebar: FC = () => {
-  const { queries, selectedQueryId, unreads, activeSearchAdd } = useAppSelector(SearchSelector);
+  const { queries, selectedQueryId, unreads, queriesInProgress } = useAppSelector(SearchSelector);
 
   const { t } = useTranslation();
 
@@ -74,10 +74,10 @@ export const SearchSidebar: FC = () => {
             <Renew />
           </IconButton>
         </Navigation>
-        {activeSearchAdd > 0 && (
+        {queriesInProgress.length > 0 && (
           <Navigation>
             <span className='spacer'></span>
-            <span>{t('AddingSearches', { count: activeSearchAdd })}</span>
+            <span>{t('AddingSearches', { count: queriesInProgress.length })}</span>
           </Navigation>
         )}
         <ScrollableContainer>{sidebarList}</ScrollableContainer>
