@@ -128,11 +128,11 @@ export POSTGRES_PASSWORD=${POSTGRES_PASSWORD}  # Set this in your shell before r
 export POSTGRES_DB=video_summary_db
 export POSTGRES_HOST=postgres-service
 
-# env for audio-intelligence service
+# env for audio-analyzer service
 export AUDIO_HOST_PORT=8999
 export AUDIO_ENABLED_MODELS=${ENABLED_WHISPER_MODELS}
 export AUDIO_MAX_FILE=314572800 # 300MB
-export AUDIO_HOST=audio-intelligence
+export AUDIO_HOST=audio-analyzer
 export AUDIO_ENDPOINT=http://$AUDIO_HOST:8000
 
 # env for minio-service
@@ -160,8 +160,14 @@ export QWEN_MODEL=${QWEN_MODEL}
 export VCLIP_START_OFFSET_SEC=0
 export VCLIP_CLIP_DURATION=15
 export VCLIP_NUM_FRAMES=64
+export VCLIP_DEVICE=${VCLIP_DEVICE:-CPU}
 export VCLIP_USE_OV=false
-export VCLIP_DEVICE=CPU
+# Set VCLIP_USE_OV to true if VCLIP_DEVICE is GPU
+if [ "$ENABLE_EMBEDDING_GPU" = true ]; then
+    export VCLIP_DEVICE=GPU
+    export VCLIP_USE_OV=true
+    echo -e "${BLUE}VCLIP-EMBEDDING-MS will use OpenVINO on GPU${NC}"
+fi
 export VCLIP_HOST=vclip-embedding-ms
 export VCLIP_ENDPOINT=http://$VCLIP_HOST:8000/embeddings
 
@@ -382,12 +388,11 @@ if [ "$1" = "--summary" ] || [ "$1" = "--all" ]; then
     echo -e  "${BLUE}Creating Docker volumes for Video Summarization services:${NC}"
     docker volume create ov-models
     docker volume create vol_evam_pipeline_root
-    docker volume create audio_intelligence_data
+    docker volume create audio_analyzer_data
 
     # Turn on feature flags for summarization and turn off search
     export SUMMARY_FEATURE="FEATURE_ON"
     export SEARCH_FEATURE="FEATURE_OFF"
-    export APP_FEATURE_MUX="ATOMIC"
 
     # If summarization is enabled, set up the environment for OVMS or VLM for summarization
     [ "$1" = "--summary" ] && APP_COMPOSE_FILE="-f docker/compose.base.yaml -f docker/compose.summary.yaml" && \
@@ -399,13 +404,12 @@ if [ "$1" = "--summary" ] || [ "$1" = "--all" ]; then
         docker volume create data-prep && \
         export SEARCH_FEATURE="FEATURE_ON" && \
         export USE_ONLY_TEXT_EMBEDDINGS=True && \
-        export APP_FEATURE_MUX="SUMMARY_SEARCH" && \
         APP_COMPOSE_FILE="-f docker/compose.base.yaml -f docker/compose.summary.yaml -f docker/compose.search.yaml" && \
         echo -e  "${GREEN}Setting up both applications: Video Summarization and Video Search${NC}"
 
-    # Check if the object detection model directory exists or is empty or whether docker-compose config is requested
-    if { [ ! -d "${OD_MODEL_OUTPUT_DIR}" ] || [ -z "$(ls -A "${OD_MODEL_OUTPUT_DIR}" 2>/dev/null)" ]; } && [ "$2" != "config" ]; then
-        echo -e  "${YELLOW}Object detection model directory does not exist or is empty. Creating it...${NC}"
+    # Check if the object detection model directory exists or whether docker-compose config is requested
+    if [ ! -d "${OD_MODEL_OUTPUT_DIR}" ] && [ "$2" != "config" ]; then
+        echo -e  "${YELLOW}Object detection model directory does not exist. Creating it...${NC}"
         mkdir -p "${OD_MODEL_OUTPUT_DIR}"
         convert_object_detection_models
     else
@@ -508,7 +512,6 @@ elif [ "$1" = "--search" ]; then
     # Turn on feature flags for search and turn off summarization
     export SUMMARY_FEATURE="FEATURE_OFF"
     export SEARCH_FEATURE="FEATURE_ON"
-    export APP_FEATURE_MUX="ATOMIC"
     export USE_ONLY_TEXT_EMBEDDINGS=False  # When only search is enabled, we use both text and video embeddings
 
     # If search is enabled, set up video search only
