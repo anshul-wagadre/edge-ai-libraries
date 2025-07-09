@@ -1,4 +1,4 @@
-import { Button, ProgressBar, TextInput } from '@carbon/react';
+import { Button, MultiSelect, ProgressBar, TextInput } from '@carbon/react';
 import axios, { AxiosProgressEvent, AxiosResponse } from 'axios';
 import { FC, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,8 @@ import { UIActions } from '../../redux/ui/ui.slice';
 import { NotificationSeverity, notify } from '../Notification/notify';
 import { VideoDTO, VideoRO } from '../../redux/video/video';
 import { videosLoad } from '../../redux/video/videoSlice';
-import { useAppDispatch } from '../../redux/store';
+import { useAppDispatch, useAppSelector } from '../../redux/store';
+import { SearchSelector } from '../../redux/search/searchSlice';
 
 export interface VideoUploadProps {
   closeDrawer: () => void;
@@ -41,6 +42,7 @@ const VideoFormContainer = styled.div`
 
 const FullWidthButton = styled(Button)`
   min-width: 100%;
+  margin-top: 1rem;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
@@ -72,6 +74,10 @@ export const VideoUploadSearch: FC<VideoUploadProps> = ({ closeDrawer, isOpen })
 
   const videoFileRef = useRef<HTMLInputElement>(null);
   const videoLabelRef = useRef<HTMLInputElement>(null);
+
+  const { suggestedTags } = useAppSelector(SearchSelector);
+  // const [multiselectValue, setMultiSelectValue] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const videoFileInputClick = () => {
     if (!uploading) {
@@ -154,8 +160,18 @@ export const VideoUploadSearch: FC<VideoUploadProps> = ({ closeDrawer, isOpen })
 
       const videoData: VideoDTO = {};
 
+      const tags = [];
+
       if (videoTags) {
-        videoData.tags = videoTags;
+        tags.push(...videoTags.split(',').map((tag) => tag.trim()));
+      }
+
+      if (selectedTags && selectedTags.length > 0) {
+        tags.push(...selectedTags.map((tag) => tag.trim()));
+      }
+
+      if (tags.length > 0) {
+        videoData.tags = tags.join(',');
       }
 
       const videoRes = await uploadVideo(videoData);
@@ -204,8 +220,25 @@ export const VideoUploadSearch: FC<VideoUploadProps> = ({ closeDrawer, isOpen })
             <FullWidthButton onClick={videoFileInputClick} kind='danger--tertiary'>
               {t('changeVideo')}
             </FullWidthButton>
+
+            {suggestedTags && suggestedTags.length > 0 && (
+              <MultiSelect
+                items={suggestedTags}
+                itemToString={(item) => (item ? item : '')}
+                // selectedItems={multiselectValue}
+                onChange={(data) => {
+                  if (data.selectedItems) {
+                    setSelectedTags(data.selectedItems);
+                    // setMultiSelectValue(data.selectedItems);
+                  }
+                }}
+                id='availabel-tags-selector'
+                label={t('availableVideoTags')}
+              />
+            )}
             <TextInputStyled
-              labelText={t('videoTags')}
+              labelText={t('customVideoTags')}
+              helperText={t('videoTagsHelperText')}
               onChange={(ev) => {
                 SetVideoTags(ev.currentTarget.value);
               }}
