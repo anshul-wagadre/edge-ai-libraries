@@ -393,6 +393,7 @@ if [ "$1" = "--summary" ] || [ "$1" = "--all" ]; then
     # Turn on feature flags for summarization and turn off search
     export SUMMARY_FEATURE="FEATURE_ON"
     export SEARCH_FEATURE="FEATURE_OFF"
+    export APP_FEATURE_MUX="ATOMIC"
 
     # If summarization is enabled, set up the environment for OVMS or VLM for summarization
     [ "$1" = "--summary" ] && APP_COMPOSE_FILE="-f docker/compose.base.yaml -f docker/compose.summary.yaml" && \
@@ -404,6 +405,7 @@ if [ "$1" = "--summary" ] || [ "$1" = "--all" ]; then
         docker volume create data-prep && \
         export SEARCH_FEATURE="FEATURE_ON" && \
         export USE_ONLY_TEXT_EMBEDDINGS=True && \
+        export APP_FEATURE_MUX="SUMMARY_SEARCH" && \
         APP_COMPOSE_FILE="-f docker/compose.base.yaml -f docker/compose.summary.yaml -f docker/compose.search.yaml" && \
         echo -e  "${GREEN}Setting up both applications: Video Summarization and Video Search${NC}"
 
