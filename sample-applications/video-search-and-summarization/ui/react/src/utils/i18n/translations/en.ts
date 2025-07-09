@@ -23,6 +23,9 @@ export const enTranslations = {
   AddingSearches: '({{count}}) search in progress',
   topK: 'Search Output Count',
   searchInProgress: 'searching',
+  customVideoTags: 'Custom Tags',
+  videoTagsHelperText: 'Add custom tags to the video, separated by commas',
+  availableVideoTags: 'Available Video Tags',
 
   uploadingVideo: 'Uploading Video',
   CreatingEmbedding: 'Creating Embedding',

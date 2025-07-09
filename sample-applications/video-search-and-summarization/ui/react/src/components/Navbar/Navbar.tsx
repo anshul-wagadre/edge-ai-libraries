@@ -91,6 +91,7 @@ const Navbar: FC = () => {
   const getVideoUploadDrawer = () => {
     const hasSearch = FEATURE_SEARCH == FEATURE_STATE.ON;
     const hasSummary = FEATURE_SUMMARY == FEATURE_STATE.ON;
+    dispatch(LoadTags());
     if (hasSearch && hasSummary) {
       return <VideoUpload closeDrawer={closeDrawer} isOpen={isDrawerOpen} />;
     } else if (hasSearch) {
