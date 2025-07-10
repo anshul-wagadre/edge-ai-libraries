@@ -91,7 +91,7 @@ export class ChunkingService {
           );
 
           windowLeft += windowLength;
-          actualLeft = windowLeft;
+          actualLeft = windowLeft - frameOverlap;
 
           if (actualLeft < 0) {
             actualLeft = 0;

@@ -514,6 +514,7 @@ elif [ "$1" = "--search" ]; then
     # Turn on feature flags for search and turn off summarization
     export SUMMARY_FEATURE="FEATURE_OFF"
     export SEARCH_FEATURE="FEATURE_ON"
+    export APP_FEATURE_MUX="ATOMIC"
     export USE_ONLY_TEXT_EMBEDDINGS=False  # When only search is enabled, we use both text and video embeddings
 
     # If search is enabled, set up video search only

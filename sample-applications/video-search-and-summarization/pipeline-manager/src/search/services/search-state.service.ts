@@ -62,23 +62,34 @@ export class SearchStateService {
       queryId,
       SearchQueryStatus.RUNNING,
     );
-
     this.$emitter.emit(SocketEvent.SEARCH_UPDATE, updatedQuery);
 
-    const results = await this.runSearch(queryId, query.query, query.tags);
-    if (results.results.length > 0) {
-      const relevantResults = results.results.find(
-        (el) => el.query_id === queryId,
-      );
+    try {
+      const results = await this.runSearch(queryId, query.query, query.tags);
+      if (results.results.length > 0) {
+        const relevantResults = results.results.find(
+          (el) => el.query_id === queryId,
+        );
 
-      if (relevantResults) {
-        const freshEntity = await this.updateResults(queryId, relevantResults);
-        return freshEntity;
+        if (relevantResults) {
+          const freshEntity = await this.updateResults(
+            queryId,
+            relevantResults,
+          );
+          return freshEntity;
+        }
+        return null;
+      } else {
+        Logger.warn(`No results found for query ID ${queryId}`);
+        return null;
       }
-      return null;
-    } else {
-      Logger.warn(`No results found for query ID ${queryId}`);
-      return null;
+    } catch (error) {
+      Logger.error(`Error running search for query ID ${queryId}`, error);
+      const updatedQuery = await this.$searchDB.updateQueryStatus(
+        queryId,
+        SearchQueryStatus.IDLE,
+      );
+      this.$emitter.emit(SocketEvent.SEARCH_UPDATE, updatedQuery);
     }
   }
 
