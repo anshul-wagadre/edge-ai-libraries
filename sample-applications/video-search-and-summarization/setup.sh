@@ -251,7 +251,7 @@ if [ "$1" != "--down" ] && [ "$2" != "config" ]; then
             return
         fi
     fi
-    if [ "$1" != "--summary" ]; then
+    if [ "$1" != "--summary" ] || [ "$1" != "--all" ]; then
         if [ -z "$VCLIP_MODEL" ]; then
             echo -e "${RED}ERROR: VCLIP_MODEL is not set in your shell environment.${NC}"
             return
@@ -259,10 +259,15 @@ if [ "$1" != "--down" ] && [ "$2" != "config" ]; then
             echo -e "${RED}ERROR: VCLIP_MODEL is set to an invalid value. Expected: 'openai/clip-vit-base-patch32'.${NC}"
             return
         fi
-        if [ -z "$QWEN_MODEL" ] || [ "$QWEN_MODEL" != "Qwen/Qwen3-Embedding-0.6B" ]; then
-            echo -e "ERROR: QWEN_MODEL is either not set or set to invalid value in your shell environment."
-        return
-fi
+    fi
+    if [ "$1" == "--all" ]; then
+        if [ -z "$VCLIP_MODEL" ]; then
+            echo -e "${RED}ERROR: VCLIP_MODEL is not set in your shell environment.${NC}"
+            return
+        elif [ -z "$QWEN_MODEL" ] || [ "$QWEN_MODEL" != "Qwen/Qwen3-Embedding-0.6B" ]; then
+            echo -e "${RED}ERROR: QWEN_MODEL is either not set or set to invalid value in your shell environment.${NC}"
+            return
+        fi
     fi
     if [ "$ENABLE_OVMS_LLM_SUMMARY" = true ] || [ "$ENABLE_OVMS_LLM_SUMMARY_GPU" = true ]; then
         if [ -z "$OVMS_LLM_MODEL_NAME" ]; then
@@ -514,6 +519,7 @@ elif [ "$1" = "--search" ]; then
     # Turn on feature flags for search and turn off summarization
     export SUMMARY_FEATURE="FEATURE_OFF"
     export SEARCH_FEATURE="FEATURE_ON"
+    export APP_FEATURE_MUX="ATOMIC"
     export USE_ONLY_TEXT_EMBEDDINGS=False  # When only search is enabled, we use both text and video embeddings
 
     # If search is enabled, set up video search only
