@@ -144,7 +144,6 @@ export MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD} # Set this in your shell befor
 
 # env for vdms-vector-db
 export VDMS_VDB_HOST_PORT=55555
-export VDMS_BUCKET=vdms-bucket
 export VDMS_VDB_HOST=vdms-vector-db
 
 # env for vdms-dataprep-ms
@@ -173,7 +172,6 @@ export VCLIP_ENDPOINT=http://$VCLIP_HOST:8000/embeddings
 
 # env for video-search
 export VS_HOST_PORT=7890
-export VS_INDEX_NAME=videosearch
 export VS_WATCHER_DIR=$PWD/data
 export VS_WATCHER_DEBOUNCE_TIME=2
 export VS_DELETE_PROCESSED_FILES=false
@@ -283,11 +281,6 @@ if [ "$1" = "--setenv" ]; then
     return 0
 fi
 
-# Generate docker volume
-echo -e  "${BLUE}Creating Docker volumes for common services:${NC}"
-docker volume create pg_data
-docker volume create minio_data
-
 # Add rendering device group ID for GPU support when needed
 # Check if render device exist
 if ls /dev/dri/render* >/dev/null 2>&1; then
@@ -389,12 +382,6 @@ export_model_for_ovms() {
 }
 
 if [ "$1" = "--summary" ] || [ "$1" = "--all" ]; then
-
-    echo -e  "${BLUE}Creating Docker volumes for Video Summarization services:${NC}"
-    docker volume create ov-models
-    docker volume create vol_evam_pipeline_root
-    docker volume create audio_analyzer_data
-
     # Turn on feature flags for summarization and turn off search
     export SUMMARY_FEATURE="FEATURE_ON"
     export SEARCH_FEATURE="FEATURE_OFF"
@@ -407,10 +394,10 @@ if [ "$1" = "--summary" ] || [ "$1" = "--all" ]; then
     # If no arguments are passed or if --all is passed, set up both summarization and search   
     [ "$1" = "--all" ] && \
         echo -e  "${BLUE}Creating Docker volumes for Video Search services:${NC}" && \
-        docker volume create data-prep && \
         export SEARCH_FEATURE="FEATURE_ON" && \
         export USE_ONLY_TEXT_EMBEDDINGS=True && \
         export APP_FEATURE_MUX="SUMMARY_SEARCH" && \
+        export VS_INDEX_NAME="video_summary_embeddings" && \
         APP_COMPOSE_FILE="-f docker/compose.base.yaml -f docker/compose.summary.yaml -f docker/compose.search.yaml" && \
         echo -e  "${GREEN}Setting up both applications: Video Summarization and Video Search${NC}"
 
@@ -511,16 +498,12 @@ if [ "$1" = "--summary" ] || [ "$1" = "--all" ]; then
     fi
 
 elif [ "$1" = "--search" ]; then
-
-    echo -e  "${BLUE}Creating Docker volumes for Video Search services: ${NC}"
-    docker volume create ov-models
-    docker volume create data-prep
-
     # Turn on feature flags for search and turn off summarization
     export SUMMARY_FEATURE="FEATURE_OFF"
     export SEARCH_FEATURE="FEATURE_ON"
     export APP_FEATURE_MUX="ATOMIC"
     export USE_ONLY_TEXT_EMBEDDINGS=False  # When only search is enabled, we use both text and video embeddings
+    export VS_INDEX_NAME="video_frame_embeddings"  # DB Index or DB Collection name for video search standalone setup
 
     # If search is enabled, set up video search only
     APP_COMPOSE_FILE="-f docker/compose.base.yaml -f docker/compose.search.yaml" 
