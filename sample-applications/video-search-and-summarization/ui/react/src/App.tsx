@@ -95,12 +95,6 @@ const App: FC = () => {
             );
           });
 
-          if (FEATURE_SEARCH === FEATURE_STATE.ON) {
-            socket.on('search:update', (data: SearchQuery) => {
-              dispatch(SearchActions.updateSearchQuery(data));
-            });
-          }
-
           // socket.on(
           //   `summary:sync/${summaryId}/summaryStream`,
           //   (data: SummaryStreamChunk) => {
@@ -109,6 +103,11 @@ const App: FC = () => {
           // );
         }
       }
+    }
+    if (FEATURE_SEARCH === FEATURE_STATE.ON) {
+      socket.on('search:update', (data: SearchQuery) => {
+        dispatch(SearchActions.updateSearchQuery(data));
+      });
     }
   }, [connectedSockets, dispatch, summaryIds]);
 
