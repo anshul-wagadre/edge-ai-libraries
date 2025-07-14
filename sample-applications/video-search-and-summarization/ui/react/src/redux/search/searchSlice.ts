@@ -12,6 +12,8 @@ const initialState: SearchState = {
   suggestedTags: [],
 };
 
+const defaultTopk = 4;
+
 export const SearchSlice = createSlice({
   name: 'search',
   initialState,
@@ -34,9 +36,9 @@ export const SearchSlice = createSlice({
     updateSearchQuery: (state: SearchState, action) => {
       const index = state.searchQueries.findIndex((query) => query.queryId === action.payload.queryId);
       if (index !== -1) {
-        state.searchQueries[index] = { ...state.searchQueries[index], ...action.payload, topK: 10 };
+        state.searchQueries[index] = { ...state.searchQueries[index], ...action.payload, topK: defaultTopk };
       } else {
-        state.searchQueries.push({ ...action.payload, topK: 10 });
+        state.searchQueries.push({ ...action.payload, topK: defaultTopk });
       }
       state.unreads.push(action.payload.queryId);
     },
@@ -63,7 +65,7 @@ export const SearchSlice = createSlice({
         if (action.payload.length === 0) {
           state.searchQueries = [];
         } else {
-          state.searchQueries = action.payload.map((query) => ({ ...query, topK: 10 }));
+          state.searchQueries = action.payload.map((query) => ({ ...query, topK: defaultTopk }));
         }
       })
       .addCase(SearchSync.fulfilled, (state, action) => {
@@ -88,7 +90,7 @@ export const SearchSlice = createSlice({
         }
       })
       .addCase(SearchAdd.fulfilled, (state, action) => {
-        state.searchQueries.push({ ...action.payload, topK: 10 });
+        state.searchQueries.push({ ...action.payload, topK: defaultTopk });
         state.selectedQuery = action.payload.queryId;
       })
       .addCase(SearchWatch.fulfilled, (state) => {
