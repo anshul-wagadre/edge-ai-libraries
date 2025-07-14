@@ -34,7 +34,6 @@ const SidebarItemWrapper = styled.div`
 
   &.unread {
     border-color: red;
-    background-color: rgb(15 98 254 / 48%);
   }
 
   &.selected,
