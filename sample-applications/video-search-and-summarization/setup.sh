@@ -298,7 +298,7 @@ if [ "$1" != "--down" ] && [ "$2" != "config" ]; then
             return
         fi
     fi
-    if [ "$1" == "--all" ]; then
+    if [ "$1" = "--all" ]; then
         if [ -z "$VCLIP_MODEL" ]; then
             echo -e "${RED}ERROR: VCLIP_MODEL is not set in your shell environment.${NC}"
             return
