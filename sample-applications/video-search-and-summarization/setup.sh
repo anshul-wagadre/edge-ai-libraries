@@ -538,6 +538,7 @@ if [ "$1" = "--summary" ] || [ "$1" = "--all" ]; then
     fi
 
 elif [ "$1" = "--search" ]; then
+    mkdir -p ${VS_WATCHER_DIR}
     # Turn on feature flags for search and turn off summarization
     export SUMMARY_FEATURE="FEATURE_OFF"
     export SEARCH_FEATURE="FEATURE_ON"

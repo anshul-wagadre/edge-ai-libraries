@@ -46,7 +46,9 @@ sample-applications/video-search-and-summarization/
 └── README.md                  # Project documentation
 ```
 
-## Setting Required Environment Variables
+## ⚙️ Setting Required Environment Variables
+
+<a name="required-env"></a>
 
 Before running the application, you need to set several environment variables:
 
@@ -158,7 +160,9 @@ The Video Summary application offers multiple stacks and deployment options:
 | VLM-OVMS-CPU | vlm-openvino-serving on CPU | OVMS Microservice on CPU | `ENABLE_OVMS_LLM_SUMMARY=true` | VLM: `Qwen/Qwen2.5-VL-3B-Instruct`<br>LLM: `Intel/neural-chat-7b-v3-3` |
 | VLM-CPU-OVMS-GPU | vlm-openvino-serving on CPU | OVMS Microservice on GPU | `ENABLE_OVMS_LLM_SUMMARY_GPU=true` | VLM: `Qwen/Qwen2.5-VL-3B-Instruct`<br>LLM: `Intel/neural-chat-7b-v3-3` |
 
-## Running the Application
+## ▶️ Running the Application
+
+<a name="running-app"></a>
 
 Follow these steps to run the application:
 
