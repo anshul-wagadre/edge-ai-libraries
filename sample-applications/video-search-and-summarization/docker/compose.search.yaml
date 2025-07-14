@@ -42,7 +42,7 @@ services:
     ports:
       - "${VS_HOST_PORT}:8000"
     environment:
-      no_proxy: ${no_proxy},${VCLIP_HOST},${VDMS_DATAPREP_HOST},${MINIO_HOST},${VDMS_VDB_HOST}
+      no_proxy: ${no_proxy},${VCLIP_HOST},${VDMS_DATAPREP_HOST},${MINIO_HOST},${VDMS_VDB_HOST},${PM_HOST}
       http_proxy: ${http_proxy}
       https_proxy: ${https_proxy}
       VDMS_VDB_HOST: ${VDMS_VDB_HOST}
@@ -127,12 +127,12 @@ services:
       DEFAULT_NUM_FRAMES: ${VCLIP_NUM_FRAMES}
       EMBEDDING_USE_OV: ${VCLIP_USE_OV}
       EMBEDDING_DEVICE: ${VCLIP_DEVICE}
-      USE_ONLY_TEXT_EMBEDDINGS: ${USE_ONLY_TEXT_EMBEDDINGS} 
+      USE_ONLY_TEXT_EMBEDDINGS: ${USE_ONLY_TEXT_EMBEDDINGS}
     devices:
       - /dev/dri:/dev/dri
     group_add:
-      - ${USER_GROUP_ID-1000} 
-      - ${VIDEO_GROUP_ID-44}    
+      - ${USER_GROUP_ID-1000}
+      - ${VIDEO_GROUP_ID-44}
       - ${RENDER_GROUP_ID-1002}
     restart: unless-stopped
     healthcheck:
